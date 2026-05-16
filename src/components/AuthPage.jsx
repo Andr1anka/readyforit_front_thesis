@@ -3,7 +3,8 @@ import { loginUser, registerUser } from "../api/authApi";
 import FloatingBubbles from "./FloatingBubbles";
 import CatAnimation from "./CatAnimation";
 
-export default function AuthPage() {
+
+export default function AuthPage({ onLoginSuccess }) {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
     firstName: "",
@@ -64,6 +65,7 @@ export default function AuthPage() {
 
         console.log("TOKEN:", data.token);
         console.log("USER:", data);
+        if (onLoginSuccess) onLoginSuccess();
         }
     } catch (err) {
       setError(
@@ -138,7 +140,7 @@ export default function AuthPage() {
                     />
                   </label>
                 </>
-            )}              
+            )}           
 
 
             <label>
