@@ -1,82 +1,141 @@
 .main-header {
-  height: 82px;
-  padding: 0 52px;
-  background: var(--purple);
+  height: 72px;
+  padding: 0 48px;
+  background: rgba(175, 163, 214, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
-  z-index: 50;
+  gap: 0;
+
+  /* sticky — завжди видимий */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 24px rgba(46, 44, 57, 0.10);
+  transition: box-shadow 0.2s;
 }
 
+/* бренд */
 .brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .brand-icon-img {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
+  border-radius: 10px;
 }
 
 .brand-title {
-  font-size: 42px;
+  font-size: 26px;
   font-weight: 900;
   color: #241f33;
   font-family: Georgia, serif;
+  letter-spacing: -0.5px;
 }
 
+/* навігація */
 .main-nav {
   display: flex;
-  gap: 34px;
+  gap: 28px;
   margin-left: auto;
-  margin-right: 70px;
+  margin-right: 48px;
 }
 
 .main-nav a {
   text-decoration: none;
   color: #2e2c39;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 800;
+  padding: 6px 4px;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.18s, color 0.18s;
 }
 
+.main-nav a:hover {
+  color: #6d5ab3;
+  border-bottom-color: #6d5ab3;
+}
+
+/* профіль дропдаун */
 .profile-menu {
   position: relative;
+  flex-shrink: 0;
 }
 
 .profile-button {
-  border: 2px solid #2e2c39;
-  background: #f4f4f4;
+  border: 2px solid rgba(46, 44, 57, 0.5);
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 999px;
-  padding: 12px 24px;
-  font-size: 18px;
+  padding: 9px 22px;
+  font-size: 16px;
   font-weight: 800;
   cursor: pointer;
+  color: #2e2c39;
+  transition: background 0.18s, box-shadow 0.18s;
+  white-space: nowrap;
+}
+
+.profile-button:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 16px rgba(46, 44, 57, 0.12);
 }
 
 .profile-dropdown {
   position: absolute;
   right: 0;
-  top: 60px;
-  width: 240px;
-  background: white;
-  border-radius: 20px;
-  padding: 14px;
+  top: calc(100% + 10px);
+  width: 220px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  gap: 8px;
+  box-shadow: 0 20px 60px rgba(46, 44, 57, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .profile-dropdown a,
 .profile-dropdown button {
+  display: block;
+  width: 100%;
   border: none;
   background: #efeff4;
   border-radius: 12px;
-  padding: 12px;
+  padding: 11px 14px;
   text-decoration: none;
   color: #2e2c39;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.profile-dropdown a:hover,
+.profile-dropdown button:hover {
+  background: #e0daf5;
+}
+
+@media (max-width: 860px) {
+  .main-header {
+    padding: 0 22px;
+  }
+
+  .main-nav {
+    display: none;
+  }
+
+  .brand-title {
+    font-size: 22px;
+  }
 }

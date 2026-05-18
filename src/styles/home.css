@@ -29,14 +29,14 @@
 }
 
 .hero-section {
-  min-height: calc(100vh - 82px);
+  min-height: calc(100vh - 72px);
   position: relative;
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 54px;
-  padding: 95px 7vw 135px;
+  padding: 90px 7vw 0;
 }
 
 .hero-section::before {
@@ -75,11 +75,12 @@
   user-select: none;
 }
 
+/* правий кіт — більший, торкається футера (bottom: 0) */
 .cat-right {
   position: absolute;
-  right: 7vw;
+  right: 5vw;
   bottom: 0;
-  width: clamp(150px, 13vw, 235px);
+  width: clamp(200px, 17vw, 300px);
   z-index: 4;
   pointer-events: none;
   user-select: none;
@@ -89,6 +90,7 @@
   position: relative;
   z-index: 6;
   max-width: 690px;
+  padding-bottom: 120px;
 }
 
 .hero-preview {
@@ -97,6 +99,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding-bottom: 80px;
 }
 
 .hero-label {
@@ -106,14 +109,14 @@
   color: #4c3f7d;
   padding: 11px 20px;
   border-radius: 999px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
   box-shadow: 0 12px 28px rgba(46, 44, 57, 0.08);
 }
 
 .hero-text h1 {
   margin: 24px 0 22px;
-  font-size: clamp(46px, 6.2vw, 82px);
+  font-size: clamp(44px, 5.8vw, 78px);
   line-height: 0.98;
   font-weight: 950;
   letter-spacing: -2px;
@@ -126,7 +129,7 @@
 
 .hero-description {
   max-width: 640px;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.72;
   font-weight: 600;
   color: rgba(46, 44, 57, 0.82);
@@ -145,11 +148,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 54px;
+  min-height: 52px;
   border-radius: 999px;
-  padding: 15px 28px;
+  padding: 13px 26px;
   text-decoration: none;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 900;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -171,17 +174,19 @@
 .secondary-btn:hover,
 .bottom-btn:hover {
   transform: translateY(-2px);
+  box-shadow: 0 20px 44px rgba(141, 120, 206, 0.45);
 }
 
 .app-preview-img {
-  width: min(100%, 660px);
-  max-height: 460px;
+  width: min(100%, 620px);
+  max-height: 440px;
   object-fit: contain;
-  border-radius: 34px;
+  border-radius: 28px;
   box-shadow: 0 26px 70px rgba(46, 44, 57, 0.18);
   background: rgba(255, 255, 255, 0.7);
 }
 
+/* ======== advantages ======== */
 .advantages-section {
   position: relative;
   z-index: 5;
@@ -191,7 +196,7 @@
 
 .advantages-section h2 {
   margin: 0 0 46px;
-  font-size: clamp(34px, 4vw, 52px);
+  font-size: clamp(32px, 3.8vw, 50px);
   line-height: 1.1;
   font-weight: 950;
   color: #2e2c39;
@@ -200,35 +205,41 @@
 .advantages-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 22px;
   text-align: left;
 }
 
 .advantage-card {
   position: relative;
-  min-height: 210px;
-  padding: 30px;
-  border-radius: 30px;
+  min-height: 200px;
+  padding: 28px;
+  border-radius: 28px;
   background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 18px 46px rgba(46, 44, 57, 0.1);
+  box-shadow: 0 14px 40px rgba(46, 44, 57, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.advantage-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 54px rgba(46, 44, 57, 0.14);
 }
 
 .advantage-card::before {
   content: "";
   display: block;
-  width: 13px;
-  height: 13px;
-  margin-bottom: 16px;
+  width: 12px;
+  height: 12px;
+  margin-bottom: 14px;
   border-radius: 50%;
   background: #8d78ce;
   box-shadow: 0 0 0 6px rgba(141, 120, 206, 0.14);
 }
 
 .advantage-card h3 {
-  margin: 0 0 12px;
-  font-size: 24px;
+  margin: 0 0 10px;
+  font-size: 22px;
   line-height: 1.2;
   font-weight: 950;
   color: #6d5ab3;
@@ -236,7 +247,7 @@
 
 .advantage-card p {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.65;
   font-weight: 600;
   color: rgba(46, 44, 57, 0.78);
@@ -246,23 +257,26 @@
   margin-top: 42px;
 }
 
+/* ======== responsive ======== */
 @media (max-width: 1100px) {
   .hero-section {
     grid-template-columns: 1fr;
-    padding-top: 70px;
+    padding-top: 65px;
   }
 
   .hero-text {
     max-width: 760px;
+    padding-bottom: 80px;
   }
 
   .hero-preview {
     justify-content: flex-start;
+    padding-bottom: 60px;
   }
 
   .cat-right {
-    right: 30px;
-    width: 170px;
+    right: 20px;
+    width: clamp(170px, 15vw, 240px);
   }
 
   .advantages-grid {
@@ -289,8 +303,16 @@
 
   .hero-section {
     min-height: auto;
-    padding: 48px 22px 120px;
-    gap: 36px;
+    padding: 44px 22px 0;
+    gap: 32px;
+  }
+
+  .hero-text {
+    padding-bottom: 100px;
+  }
+
+  .hero-preview {
+    padding-bottom: 80px;
   }
 
   .hero-section::before {
@@ -308,12 +330,12 @@
   }
 
   .hero-text h1 {
-    font-size: 42px;
+    font-size: 40px;
     letter-spacing: -1px;
   }
 
   .hero-description {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .hero-actions {
@@ -327,24 +349,24 @@
   }
 
   .cat-left {
-    width: 190px;
+    width: 180px;
     left: -80px;
-    bottom: 75px;
+    bottom: 60px;
   }
 
   .cat-right {
-    width: 140px;
-    right: 20px;
+    width: 160px;
+    right: 10px;
     bottom: 0;
   }
 
   .app-preview-img {
-    border-radius: 24px;
-    max-height: 340px;
+    border-radius: 22px;
+    max-height: 300px;
   }
 
   .advantages-section {
-    padding: 58px 22px 80px;
+    padding: 54px 22px 74px;
   }
 
   .advantages-grid {
@@ -353,6 +375,6 @@
 
   .advantage-card {
     min-height: auto;
-    padding: 26px;
+    padding: 24px;
   }
 }

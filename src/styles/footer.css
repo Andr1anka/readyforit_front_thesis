@@ -1,11 +1,14 @@
 .main-footer {
-  height: 74px;
-  background: var(--purple);
+  height: 68px;
+  background: rgba(175, 163, 214, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 52px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: #2e2c39;
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
 }

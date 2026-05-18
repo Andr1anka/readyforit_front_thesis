@@ -16,21 +16,21 @@ export default function HomePage({ onLogout }) {
           <img className="cat-right" src={catRight} alt="ReadyForIT Cat" />
 
           <div className="hero-text">
-            <p className="hero-label">Готові до технічного інтервʼю?</p>
+            <p className="hero-label">Готові до технічного інтерв'ю?</p>
 
             <h1>
               Ласкаво просимо до <span>ReadyForIT</span>
             </h1>
 
             <p className="hero-description">
-              Платформа для проведення пробних технічних інтервʼю. Отримуйте
+              Платформа для проведення пробних технічних інтерв'ю. Отримуйте
               реальний досвід, практикуйте live coding, проходьте співбесіди з
               перевіреними експертами та отримуйте фідбек від менторів.
             </p>
 
             <div className="hero-actions">
               <a className="primary-btn" href="/interviewers">
-                Переглянути інтервʼюерів
+                Переглянути інтерв'юерів
               </a>
 
               <a className="secondary-btn" href="#advantages">
@@ -64,14 +64,14 @@ export default function HomePage({ onLogout }) {
               <h3>Практичний перший досвід</h3>
               <p>
                 Реалістичний формат технічної співбесіди без стресу та страху
-                перед реальним інтервʼю.
+                перед реальним інтерв'ю.
               </p>
             </article>
 
             <article className="advantage-card">
               <h3>Графік</h3>
               <p>
-                Плануйте пробні інтервʼю у зручний для вас час та ефективно
+                Плануйте пробні інтерв'ю у зручний для вас час та ефективно
                 організовуйте підготовку.
               </p>
             </article>
@@ -79,7 +79,7 @@ export default function HomePage({ onLogout }) {
             <article className="advantage-card">
               <h3>Перевірені експерти</h3>
               <p>
-                Інтервʼю проводять спеціалісти, які працюють у сфері IT та
+                Інтерв'ю проводять спеціалісти, які працюють у сфері IT та
                 мають досвід технічних співбесід.
               </p>
             </article>
@@ -87,7 +87,7 @@ export default function HomePage({ onLogout }) {
             <article className="advantage-card">
               <h3>Відгук від ментора</h3>
               <p>
-                Після проходження інтервʼю ви отримуєте детальний фідбек щодо
+                Після проходження інтерв'ю ви отримуєте детальний фідбек щодо
                 сильних сторін і того, що варто покращити.
               </p>
             </article>
@@ -95,14 +95,14 @@ export default function HomePage({ onLogout }) {
             <article className="advantage-card">
               <h3>Платформа</h3>
               <p>
-                Усе необхідне в одному місці: профілі, інтервʼюери, live coding
+                Усе необхідне в одному місці: профілі, інтерв'юери, live coding
                 та підготовка до технічних співбесід.
               </p>
             </article>
           </div>
 
           <a className="bottom-btn" href="/interviewers">
-            Знайти інтервʼюера
+            Знайти інтерв'юера
           </a>
         </section>
       </main>
