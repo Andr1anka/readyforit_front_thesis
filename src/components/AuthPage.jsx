@@ -61,6 +61,7 @@ export default function AuthPage({ onLoginSuccess }) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("firstName", data.firstName || "");
         localStorage.setItem("lastName", data.lastName || "");
+        localStorage.setItem("role", data.role || data.user?.role || "USER");
 
             /* повідомлення */
         setMessage(data.message || "Вхід виконано успішно!");

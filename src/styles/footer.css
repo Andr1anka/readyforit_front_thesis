@@ -1,0 +1,11 @@
+.main-footer {
+  height: 74px;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 52px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #2e2c39;
+}

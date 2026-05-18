@@ -1,0 +1,82 @@
+.main-header {
+  height: 82px;
+  padding: 0 52px;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  z-index: 50;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+}
+
+.brand-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.brand-title {
+  font-size: 42px;
+  font-weight: 900;
+  color: #241f33;
+  font-family: Georgia, serif;
+}
+
+.main-nav {
+  display: flex;
+  gap: 34px;
+  margin-left: auto;
+  margin-right: 70px;
+}
+
+.main-nav a {
+  text-decoration: none;
+  color: #2e2c39;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.profile-menu {
+  position: relative;
+}
+
+.profile-button {
+  border: 2px solid #2e2c39;
+  background: #f4f4f4;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: 60px;
+  width: 240px;
+  background: white;
+  border-radius: 20px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.profile-dropdown a,
+.profile-dropdown button {
+  border: none;
+  background: #efeff4;
+  border-radius: 12px;
+  padding: 12px;
+  text-decoration: none;
+  color: #2e2c39;
+  font-weight: 700;
+  cursor: pointer;
+}
