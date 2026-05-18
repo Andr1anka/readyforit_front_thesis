@@ -57,8 +57,7 @@ export default function Header({ onLogout }) {
       <nav className="main-nav">
         <a href="/">Головна</a>
         <a href="/interviewers">Інтервʼюери</a>
-        <a href="/reviews">Відгуки</a>
-        <a href="/about">Про проєкт</a>
+        <a href="/reviews">Розклад</a>
       </nav>
 
       <div className="profile-menu">
