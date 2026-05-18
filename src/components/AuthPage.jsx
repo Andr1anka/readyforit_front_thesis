@@ -59,6 +59,8 @@ export default function AuthPage({ onLoginSuccess }) {
 
             /* збереження JWT token */
         localStorage.setItem("token", data.token);
+        localStorage.setItem("firstName", data.firstName || "");
+        localStorage.setItem("lastName", data.lastName || "");
 
             /* повідомлення */
         setMessage(data.message || "Вхід виконано успішно!");
