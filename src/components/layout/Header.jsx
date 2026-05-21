@@ -1,71 +1,108 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import "../../styles/header.css";
 
 import siteIcon from "../../assets/images/site-icon.png";
 
-export default function Header({ onLogout }) {
+/**
+ * Пропси:
+ *   onLogout            ─ викид токена і повернення на AuthPage
+ *   onNavigate(screen)  ─ переключення екрану в App.jsx
+ *                         screen ∈ { "home", "interviewers", "schedule",
+ *                                    "profile", "interviewer-profile", "admin" }
+ *   current             ─ ім'я поточного екрану (для підсвічування активного пункту)
+ */
+export default function Header({ onLogout, onNavigate, current = "home" }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   const firstName = localStorage.getItem("firstName") || "";
   const lastName = localStorage.getItem("lastName") || "";
   const role = localStorage.getItem("role") || "USER";
 
-  const displayName =
-    `${firstName} ${lastName}`.trim() || "Користувач";
+  const displayName = `${firstName} ${lastName}`.trim() || "Користувач";
+
+  // Закриваємо дропдаун при кліку поза ним
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
   const menuItems = useMemo(() => {
     if (role === "ADMIN") {
       return [
-        { title: "Профіль", href: "/profile" },
-        { title: "Панель адміністратора", href: "/admin" },
+        { title: "Профіль", screen: "profile" },
+        { title: "Панель адміністратора", screen: "admin" },
       ];
     }
 
     if (role === "INTERVIEWER") {
       return [
-        { title: "Профіль", href: "/profile" },
-        { title: "Профіль інтервʼюера", href: "/interviewer-profile" },
+        { title: "Профіль", screen: "profile" },
+        { title: "Профіль інтервʼюера", screen: "interviewer-profile" },
       ];
     }
 
-    return [{ title: "Профіль", href: "/profile" }];
+    return [{ title: "Профіль", screen: "profile" }];
   }, [role]);
+
+  const go = (screen) => {
+    setIsMenuOpen(false);
+    onNavigate?.(screen);
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("firstName");
     localStorage.removeItem("lastName");
     localStorage.removeItem("role");
-
-    onLogout();
+    setIsMenuOpen(false);
+    onLogout?.();
   };
 
   return (
     <header className="main-header">
-      <a href="/" className="brand">
-        <img
-          className="brand-icon-img"
-          src={siteIcon}
-          alt="ReadyForIT"
-        />
-
-        <span className="brand-title">
-          ReadyForIT
-        </span>
-      </a>
+      <button
+        type="button"
+        className="brand"
+        onClick={() => go("home")}
+      >
+        <img className="brand-icon-img" src={siteIcon} alt="ReadyForIT" />
+        <span className="brand-title">ReadyForIT</span>
+      </button>
 
       <nav className="main-nav">
-        <a href="/">Головна</a>
-        <a href="/interviewers">Інтервʼюери</a>
-        <a href="/reviews">Розклад</a>
+        <button
+          type="button"
+          className={current === "home" ? "active" : ""}
+          onClick={() => go("home")}
+        >
+          Головна
+        </button>
+        <button
+          type="button"
+          className={current === "interviewers" ? "active" : ""}
+          onClick={() => go("interviewers")}
+        >
+          Інтервʼюери
+        </button>
+        <button
+          type="button"
+          className={current === "schedule" ? "active" : ""}
+          onClick={() => go("schedule")}
+        >
+          Розклад
+        </button>
       </nav>
 
-      <div className="profile-menu">
+      <div className="profile-menu" ref={menuRef}>
         <button
           className="profile-button"
-          onClick={() =>
-            setIsMenuOpen((prev) => !prev)
-          }
+          onClick={() => setIsMenuOpen((prev) => !prev)}
         >
           {displayName}
         </button>
@@ -73,15 +110,17 @@ export default function Header({ onLogout }) {
         {isMenuOpen && (
           <div className="profile-dropdown">
             {menuItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
+              <button
+                type="button"
+                key={item.screen}
+                className={current === item.screen ? "active" : ""}
+                onClick={() => go(item.screen)}
               >
                 {item.title}
-              </a>
+              </button>
             ))}
 
-            <button onClick={logout}>
+            <button type="button" className="logout-item" onClick={logout}>
               Вийти
             </button>
           </div>

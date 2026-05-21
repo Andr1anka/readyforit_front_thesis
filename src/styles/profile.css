@@ -1,0 +1,277 @@
+/* === PROFILE PAGE === */
+.profile-page {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.profile-loading {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--dark);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 24px 80px rgba(46, 44, 57, 0.18);
+  border-radius: 28px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+}
+
+.avatar-upload-btn {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(175, 163, 214, 0.6);
+  font-size: 18px;
+  transition: transform .2s;
+}
+.avatar-upload-btn:hover {
+  transform: scale(1.08);
+}
+
+.profile-summary h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+}
+.profile-email {
+  margin: 0 0 12px;
+  color: #6e6b7e;
+}
+.profile-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge-role { background: var(--light-purple); color: var(--dark); }
+.role-interviewer { background: #cee6d0; color: #1f5a2c; }
+.role-admin { background: #ffe1e1; color: #7a1f1f; }
+.badge-verified { background: #cee6d0; color: #1f5a2c; }
+.badge-pending { background: #fff1c2; color: #6b4f00; }
+
+.badge-success, .badge-sandbox { background: #cee6d0; color: #1f5a2c; }
+.badge-failure { background: #ffe1e1; color: #7a1f1f; }
+.badge-created { background: var(--light-purple); color: var(--dark); }
+.badge-reversed { background: #e0e0e0; color: #555; }
+
+/* === TABS === */
+.profile-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--light-purple);
+  border-radius: 18px;
+  padding: 6px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.profile-tabs button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  color: var(--dark);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.profile-tabs button.active {
+  background: var(--white);
+  box-shadow: 0 8px 20px rgba(46, 44, 57, 0.12);
+}
+
+/* === CONTENT CARDS === */
+.profile-content {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 24px 80px rgba(46, 44, 57, 0.18);
+  border-radius: 28px;
+  padding: 30px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.profile-form h3 {
+  margin: 0 0 6px;
+}
+.hint {
+  color: #6e6b7e;
+  font-size: 14px;
+  margin: 0 0 6px;
+}
+.info-message {
+  background: var(--light-purple);
+  color: var(--dark);
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+textarea {
+  border: 2px solid transparent;
+  background: #efeff4;
+  padding: 15px 16px;
+  border-radius: 16px;
+  font-size: 15px;
+  color: var(--dark);
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+textarea:focus {
+  border-color: var(--purple);
+  background: #fff;
+}
+
+.ghost-btn {
+  border: 2px solid var(--purple);
+  background: transparent;
+  color: var(--dark);
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* === CAMERA === */
+.camera-capture {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.camera-frame {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+}
+.camera-video {
+  width: 100%;
+  display: block;
+  background: #000;
+}
+.brightness-pill {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+}
+.brightness-pill.ok { background: rgba(31, 90, 44, 0.85); }
+.brightness-pill.warn { background: rgba(122, 31, 31, 0.85); }
+.camera-actions {
+  display: flex;
+  gap: 12px;
+}
+.selfie-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+}
+.selfie-preview {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 16px;
+}
+.rejected-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* === INTERVIEWER === */
+.application-summary {
+  background: #efeff4;
+  padding: 18px;
+  border-radius: 16px;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.application-summary p { margin: 4px 0; }
+.application-summary .multiline { white-space: pre-wrap; }
+
+/* === WALLET === */
+.balance-card {
+  background: linear-gradient(135deg, var(--purple), var(--light-purple));
+  color: white;
+  padding: 24px;
+  border-radius: 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 12px 30px rgba(175, 163, 214, 0.5);
+}
+.balance-label {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+.balance-amount {
+  font-size: 40px;
+  font-weight: 800;
+}
+.payment-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #efeff4;
+  padding: 14px 18px;
+  border-radius: 14px;
+}
+.payment-amount {
+  font-weight: 800;
+  font-size: 18px;
+}
+.payment-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #6e6b7e;
+}

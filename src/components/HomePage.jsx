@@ -6,7 +6,7 @@ import catLeft from "../assets/images/cat-left.png";
 import catRight from "../assets/images/cat-right.png";
 import appPreview from "../assets/images/app-preview.png";
 
-export default function HomePage({ onLogout }) {
+export default function HomePage({ onLogout, onNavigateProfile }) {
   return (
     <Layout onLogout={onLogout}>
       <main className="main-page">
