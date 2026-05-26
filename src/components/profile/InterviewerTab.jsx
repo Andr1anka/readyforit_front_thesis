@@ -26,7 +26,7 @@ export default function InterviewerTab({ user, onChange }) {
   if (loading) return <div>Завантаження...</div>;
 
   // Не верифікований
-  if (!user.isVerificated) {
+  if (!(user.isVerificated || user.verificated)) {
     return (
       <div className="info-message">
         Щоб подати заявку на інтерв'юера, спочатку пройдіть верифікацію особи.

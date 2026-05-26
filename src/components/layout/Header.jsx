@@ -97,6 +97,13 @@ export default function Header({ onLogout, onNavigate, current = "home" }) {
         >
           Розклад
         </button>
+        <button
+          type="button"
+          className={current === "reviews" ? "active" : ""}
+          onClick={() => go("reviews")}
+        >
+          Відгуки
+        </button>
       </nav>
 
       <div className="profile-menu" ref={menuRef}>

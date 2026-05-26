@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Відкриває камеру, постійно вимірює середню яскравість кадру (Y-канал).
- * Кнопка "Зробити знімок" активна тільки якщо яскравість >= порогу.
- * Повертає Blob через onCapture(blob).
+ * Відкриває камеру і повертає Blob через onCapture(blob).
+ *
+ * Примітка: раніше тут було обмеження за яскравістю кадру — кнопка знімка
+ * блокувалась, поки освітлення не перевищить поріг. Воно працювало
+ * некоректно (хибно блокувало навіть при нормальному світлі), тому
+ * прибрано: тепер знімок можна зробити завжди, коли камера активна.
  */
 export default function CameraCapture({ onCapture, onCancel }) {
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
   const streamRef = useRef(null);
-  const [brightness, setBrightness] = useState(0);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
-
-  const BRIGHTNESS_THRESHOLD = 90; // 0..255, добре освітлення ≈ 90+
 
   useEffect(() => {
     let stopped = false;
@@ -30,36 +30,11 @@ export default function CameraCapture({ onCapture, onCancel }) {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play();
+          setReady(true);
         }
-        tick();
       } catch (e) {
         setError("Не вдалося відкрити камеру: " + e.message);
       }
-    }
-
-    function tick() {
-      if (stopped) return;
-      const v = videoRef.current;
-      const c = canvasRef.current;
-      if (v && c && v.readyState >= 2) {
-        const w = 80;
-        const h = 60;
-        c.width = w;
-        c.height = h;
-        const ctx = c.getContext("2d");
-        ctx.drawImage(v, 0, 0, w, h);
-        const { data } = ctx.getImageData(0, 0, w, h);
-        let sum = 0;
-        let count = 0;
-        for (let i = 0; i < data.length; i += 4) {
-          // luminance Rec. 601
-          const y = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          sum += y;
-          count++;
-        }
-        setBrightness(Math.round(sum / count));
-      }
-      requestAnimationFrame(tick);
     }
 
     start();
@@ -88,19 +63,13 @@ export default function CameraCapture({ onCapture, onCancel }) {
     );
   };
 
-  const canCapture = brightness >= BRIGHTNESS_THRESHOLD && !error;
+  const canCapture = ready && !error;
 
   return (
     <div className="camera-capture">
       {error && <div className="error-message">{error}</div>}
       <div className="camera-frame">
         <video ref={videoRef} playsInline muted className="camera-video" />
-        <canvas ref={canvasRef} style={{ display: "none" }} />
-        <div className={`brightness-pill ${canCapture ? "ok" : "warn"}`}>
-          {canCapture
-            ? `✓ Освітлення достатнє (${brightness})`
-            : `⚠ Замало світла (${brightness}). Перейдіть до світла.`}
-        </div>
       </div>
       <div className="camera-actions">
         <button type="button" className="ghost-btn" onClick={onCancel}>

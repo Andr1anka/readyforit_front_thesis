@@ -77,6 +77,22 @@ export const initTopup = async (amount, currency = "UAH") => {
   return res.data;
 };
 
+// Підтвердження поповнення після повернення з LiqPay (для тестового режиму / localhost,
+// де серверний callback не доходить). Бек звіряє статус напряму через LiqPay status API.
+export const confirmTopup = async (orderId) => {
+  const res = await API.post("/payment/topup/confirm", null, {
+    params: { orderId },
+  });
+  return res.data;
+};
+
+// Перевіряє всі незавершені транзакції через LiqPay status API.
+// Використовується коли orderId з sessionStorage міг бути втрачений після redirect.
+export const confirmPendingTopups = async () => {
+  const res = await API.post("/payment/topup/confirm-pending");
+  return res.data; // масив PaymentHistoryItemDTO
+};
+
 export const getPaymentHistory = async () => {
   const res = await API.get("/payment/history");
   return res.data;

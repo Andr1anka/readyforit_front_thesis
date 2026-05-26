@@ -18,20 +18,45 @@ const TABS = [
 
 export default function ProfilePage({ onLogout, onNavigate, current }) {
   const [user, setUser] = useState(null);
-  const [tab, setTab] = useState("info");
+
+  const [tab, setTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") || (params.get("topup") === "done" ? "wallet" : "info");
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [avatarBlobUrl, setAvatarBlobUrl] = useState(null);
 
+  const buildApiFileUrl = (url) => {
+    if (!url) return null;
+    if (/^https?:\/\//i.test(url)) return url;
+
+    const apiBase = import.meta.env.VITE_API_URL || "";
+    const originBase = apiBase.endsWith("/api")
+      ? apiBase.slice(0, -4)
+      : apiBase.replace(/\/$/, "");
+
+    return `${originBase}${url.startsWith("/") ? url : `/${url}`}`;
+  };
+
   const loadAvatar = async (relativeUrl) => {
     try {
-      const fullUrl = (import.meta.env.VITE_API_URL || "") + relativeUrl;
+      const fullUrl = buildApiFileUrl(relativeUrl);
+      if (!fullUrl) return;
+
       const token = localStorage.getItem("token");
+
       const res = await fetch(fullUrl, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       if (!res.ok) return;
+
       const blob = await res.blob();
+
       setAvatarBlobUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return URL.createObjectURL(blob);
@@ -45,8 +70,9 @@ export default function ProfilePage({ onLogout, onNavigate, current }) {
     try {
       const data = await getMyProfile();
       setUser(data);
-      if (data.hasCustomAvatar) {
-        loadAvatar(data.avatarUrl);
+
+      if (data.hasCustomAvatar && data.avatarUrl) {
+        await loadAvatar(data.avatarUrl);
       }
     } catch (e) {
       setError(e.response?.data?.message || "Не вдалося завантажити профіль");
@@ -57,25 +83,38 @@ export default function ProfilePage({ onLogout, onNavigate, current }) {
 
   useEffect(() => {
     loadProfile();
+
     return () => {
       setAvatarBlobUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return null;
       });
     };
-    // eslint-disable-next-line
   }, []);
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     try {
       const updated = await uploadAvatar(file);
       setUser(updated);
-      if (updated.hasCustomAvatar) loadAvatar(updated.avatarUrl);
+
+      if (updated.hasCustomAvatar && updated.avatarUrl) {
+        await loadAvatar(updated.avatarUrl);
+      }
     } catch (err) {
       alert(err.response?.data?.message || "Не вдалося завантажити аватар");
     }
+  };
+
+  const handleTabChange = (newTab) => {
+    setTab(newTab);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", newTab);
+    url.searchParams.delete("topup");
+    window.history.replaceState({}, "", url);
   };
 
   return (
@@ -85,12 +124,15 @@ export default function ProfilePage({ onLogout, onNavigate, current }) {
       {loading ? (
         <div className="profile-loading">Завантаження...</div>
       ) : error ? (
-        <div className="error-message" style={{ margin: 40 }}>{error}</div>
+        <div className="error-message" style={{ margin: 40 }}>
+          {error}
+        </div>
       ) : user ? (
         <main className="profile-page">
           <header className="profile-header">
             <div className="profile-avatar-wrap">
               <Avatar user={user} size={140} src={avatarBlobUrl} />
+
               <label className="avatar-upload-btn" title="Завантажити нове фото">
                 📷
                 <input
@@ -101,18 +143,23 @@ export default function ProfilePage({ onLogout, onNavigate, current }) {
                 />
               </label>
             </div>
+
             <div className="profile-summary">
               <h1>
                 {user.firstName} {user.lastName}
               </h1>
+
               <p className="profile-email">{user.email}</p>
+
               <div className="profile-badges">
                 <span className={`badge badge-role role-${user.role.toLowerCase()}`}>
                   {roleLabel(user.role)}
                 </span>
-                {user.isVerificated && (
+
+                {(user.isVerificated || user.verificated) && (
                   <span className="badge badge-verified">✓ Верифіковано</span>
                 )}
+
                 {user.interviewerRequestStatus === "PENDING" && (
                   <span className="badge badge-pending">
                     Заявку на інтерв'юера подано
@@ -127,7 +174,7 @@ export default function ProfilePage({ onLogout, onNavigate, current }) {
               <button
                 key={t.key}
                 className={tab === t.key ? "active" : ""}
-                onClick={() => setTab(t.key)}
+                onClick={() => handleTabChange(t.key)}
               >
                 {t.label}
               </button>
@@ -136,14 +183,20 @@ export default function ProfilePage({ onLogout, onNavigate, current }) {
 
           <section className="profile-content">
             {tab === "info" && <PersonalInfoTab user={user} onUpdated={setUser} />}
+
             {tab === "security" && <SecurityTab />}
+
             {tab === "verification" && (
               <VerificationTab user={user} onChange={loadProfile} />
             )}
+
             {tab === "interviewer" && (
               <InterviewerTab user={user} onChange={loadProfile} />
             )}
-            {tab === "wallet" && <WalletTab user={user} />}
+
+            {tab === "wallet" && (
+              <WalletTab user={user} onBalanceChange={loadProfile} />
+            )}
           </section>
         </main>
       ) : null}

@@ -55,7 +55,7 @@ export default function VerificationTab({ user, onChange }) {
   };
 
   // === Стан: вже верифікований ===
-  if (user.isVerificated) {
+ if (user.isVerificated || user.verificated) {
     return (
       <div className="profile-form">
         <div className="success-message">
@@ -80,7 +80,7 @@ export default function VerificationTab({ user, onChange }) {
     <div className="profile-form">
       <h3>Верифікація особи (KYC)</h3>
       <p className="hint">
-        Завантажте фото паспорта або ID-картки та зробіть селфі. Система звірить ваше обличчя
+        Перед верифікацією завантажте фото профілю. Потім завантажте фото паспорта або ID-картки та зробіть селфі. Система звірить ваше обличчя
         та ім'я з документом.
       </p>
 

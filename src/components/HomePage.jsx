@@ -6,9 +6,9 @@ import catLeft from "../assets/images/cat-left.png";
 import catRight from "../assets/images/cat-right.png";
 import appPreview from "../assets/images/app-preview.png";
 
-export default function HomePage({ onLogout, onNavigateProfile }) {
+export default function HomePage({ onLogout, onNavigate, current }) {
   return (
-    <Layout onLogout={onLogout}>
+    <Layout onLogout={onLogout} onNavigate={onNavigate} current={current}>
       <main className="main-page">
         <section className="hero-section">
           <img className="cat-left" src={catLeft} alt="ReadyForIT Cat" />
@@ -28,9 +28,13 @@ export default function HomePage({ onLogout, onNavigateProfile }) {
             </p>
 
             <div className="hero-actions">
-              <a className="primary-btn" href="/interviewers">
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={() => onNavigate?.("interviewers")}
+              >
                 Переглянути інтервʼюерів
-              </a>
+              </button>
 
               <a className="secondary-btn" href="#advantages">
                 Дізнатися більше
@@ -100,9 +104,13 @@ export default function HomePage({ onLogout, onNavigateProfile }) {
             </article>
           </div>
 
-          <a className="bottom-btn" href="/interviewers">
+          <button
+            type="button"
+            className="bottom-btn"
+            onClick={() => onNavigate?.("interviewers")}
+          >
             Знайти інтервʼюера
-          </a>
+          </button>
 
           <img className="cat-footer" src={catRight} alt="ReadyForIT Cat" />
         </section>

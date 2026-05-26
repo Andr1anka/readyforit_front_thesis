@@ -1,0 +1,43 @@
+/* === ADMIN PANEL === */
+.adm-page { max-width: 920px; margin: 0 auto; padding: 28px 20px 60px; }
+.adm-page h1 { margin: 0 0 16px; }
+.adm-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.adm-tabs button {
+  border: 1px solid var(--light-purple); background: var(--white);
+  border-radius: 12px; padding: 8px 16px; cursor: pointer;
+  font-weight: 600; color: var(--dark); font-size: 14px;
+}
+.adm-tabs button.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+.adm-filter { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 14px; color: #6e6b7e; }
+.adm-filter select { border: 1px solid var(--light-purple); border-radius: 10px; padding: 6px 10px; background: var(--white); }
+
+.adm-list { display: flex; flex-direction: column; gap: 14px; }
+.adm-card {
+  background: var(--white); border: 1px solid var(--light-purple);
+  border-radius: 16px; padding: 16px 18px;
+}
+.adm-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.adm-muted { color: #9a96ad; font-size: 13px; }
+.adm-fields { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #4a4856; margin-bottom: 10px; }
+.adm-text { margin: 8px 0; color: #4a4856; font-size: 14px; line-height: 1.5; }
+.adm-note { background: #faf9fd; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #4a4856; }
+.adm-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.ghost-btn.danger { border-color: #e08a8a; color: #7a1f1f; }
+
+.adm-search {
+  width: 100%; border: 1px solid var(--light-purple); border-radius: 12px;
+  padding: 10px 14px; font-size: 14px; margin-bottom: 14px;
+}
+.adm-table { display: flex; flex-direction: column; }
+.adm-tr {
+  display: grid; grid-template-columns: 1.4fr 1.8fr 1fr 1fr auto;
+  gap: 10px; align-items: center;
+  padding: 12px 10px; border-bottom: 1px solid #efeef5; font-size: 14px;
+}
+.adm-th { font-weight: 700; color: #6e6b7e; border-bottom: 2px solid var(--light-purple); }
+.adm-blocked { color: #7a1f1f; font-style: normal; font-weight: 600; }
+@media (max-width: 700px) {
+  .adm-tr { grid-template-columns: 1fr 1fr; }
+  .adm-th { display: none; }
+}
