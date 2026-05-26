@@ -63,7 +63,7 @@ function ReviewsList({ items, mode }) {
     <div className="rv-list">
       {items.map((r) => (
         <div key={r.id} className="rv-item">
-          <Avatar user={{ initials: initials(r.counterpartFirstName, r.counterpartLastName) }} size={46} />
+          <ReviewAvatar review={r} />
           <div className="rv-item-body">
             <div className="rv-item-top">
               <strong>{r.counterpartFirstName} {r.counterpartLastName}</strong>
@@ -79,6 +79,75 @@ function ReviewsList({ items, mode }) {
       ))}
     </div>
   );
+}
+
+function ReviewAvatar({ review }) {
+  const [avatarBlobUrl, setAvatarBlobUrl] = useState(null);
+
+  useEffect(() => {
+    let objectUrl = null;
+    let cancelled = false;
+
+    const loadAvatar = async () => {
+      if (!review?.counterpartPhoto) return;
+
+      try {
+        const fullUrl = buildApiFileUrl(review.counterpartPhoto);
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(fullUrl, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (!res.ok) return;
+
+        const blob = await res.blob();
+        objectUrl = URL.createObjectURL(blob);
+
+        if (!cancelled) {
+          setAvatarBlobUrl(objectUrl);
+        }
+      } catch (err) {
+        console.warn("Не вдалося завантажити фото користувача", err);
+      }
+    };
+
+    loadAvatar();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [review?.counterpartPhoto]);
+
+  return (
+    <Avatar
+      user={{
+        initials: initials(review.counterpartFirstName, review.counterpartLastName),
+        firstName: review.counterpartFirstName,
+        lastName: review.counterpartLastName,
+      }}
+      size={46}
+      src={avatarBlobUrl}
+    />
+  );
+}
+
+function buildApiFileUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const apiBase = import.meta.env.VITE_API_URL || "";
+
+  if (url.startsWith("/api/")) {
+    const originBase = apiBase.endsWith("/api")
+      ? apiBase.slice(0, -4)
+      : apiBase.replace(/\/$/, "");
+
+    return `${originBase}${url}`;
+  }
+
+  return `${apiBase.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
 }
 
 function ComplaintsList({ items }) {

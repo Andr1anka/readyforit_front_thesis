@@ -235,6 +235,11 @@
     45deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 8px
   );
 }
+.slotgrid-slot-start {
+  font-size: 11px;
+  opacity: .85;
+  margin-top: 2px;
+}
 .slotgrid-slot-end { opacity: .85; font-weight: 600; }
 .slotgrid-legend {
   display: flex;

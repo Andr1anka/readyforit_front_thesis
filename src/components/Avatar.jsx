@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const PALETTE = [
   ["#afa3d6", "#d5ceec"],
@@ -17,12 +17,37 @@ function pickGradient(seed) {
 
 export default function Avatar({ user, size = 120, src = null }) {
   const [errored, setErrored] = useState(false);
-  const showImage = src && !errored;
+  
+  const [blobSrc, setBlobSrc] = useState(null);
+
+useEffect(() => {
+  if (!src) return;
+
+  const token = localStorage.getItem("token");
+
+  fetch(src, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Avatar load failed");
+      return res.blob();
+    })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      setBlobSrc(url);
+    })
+    .catch(() => setErrored(true));
+
+  return () => {
+    if (blobSrc) URL.revokeObjectURL(blobSrc);
+  };
+}, [src]);
+  const showImage = blobSrc && !errored;
 
   if (showImage) {
     return (
       <img
-        src={src}
+        src={blobSrc}
         alt="avatar"
         width={size}
         height={size}

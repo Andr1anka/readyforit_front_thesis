@@ -1,23 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 
-export default function ChatPanel({ roomId, displayName, onClose }) {
+const SIGNALING_URL = import.meta.env.VITE_SIGNALING_URL || "ws://localhost:4444";
+
+export default function ChatPanel({ roomId, displayName, participantId, onClose }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const yarrayRef = useRef(null);
-  const providerRef = useRef(null);
   const scrollRef = useRef(null);
+
+  const me = useMemo(() => participantId || getStableClientId(), [participantId]);
 
   useEffect(() => {
     const ydoc = new Y.Doc();
     const provider = new WebrtcProvider(`${roomId}-chat`, ydoc, {
-      signaling: ["ws://localhost:4444"],
+      signaling: [SIGNALING_URL],
     });
     const yarray = ydoc.getArray("messages");
-
     yarrayRef.current = yarray;
-    providerRef.current = provider;
 
     const update = () => setMessages(yarray.toArray());
     yarray.observe(update);
@@ -31,17 +32,19 @@ export default function ChatPanel({ roomId, displayName, onClose }) {
   }, [roomId]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
   const send = () => {
     const trimmed = text.trim();
     if (!trimmed || !yarrayRef.current) return;
-    yarrayRef.current.push([
-      { author: displayName, text: trimmed, at: Date.now() },
-    ]);
+
+    yarrayRef.current.push([{
+      senderId: me,
+      author: displayName || "Учасник",
+      text: trimmed,
+      at: Date.now(),
+    }]);
     setText("");
   };
 
@@ -53,20 +56,18 @@ export default function ChatPanel({ roomId, displayName, onClose }) {
       </div>
 
       <div className="chat-messages" ref={scrollRef}>
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={
-              "chat-msg " + (m.author === displayName ? "own" : "")
-            }
-          >
-            <div className="chat-author">{m.author}</div>
-            <div className="chat-text">{m.text}</div>
-          </div>
-        ))}
-        {messages.length === 0 && (
-          <div className="chat-empty">Повідомлень ще немає</div>
-        )}
+        {messages.map((m, i) => {
+          const own = m.senderId === me;
+          return (
+            <div key={`${m.at || i}-${i}`} className={`chat-row ${own ? "own" : "other"}`}>
+              <div className="chat-msg">
+                <div className="chat-author">{own ? "Ви" : (m.author || "Учасник")}</div>
+                <div className="chat-text">{m.text}</div>
+              </div>
+            </div>
+          );
+        })}
+        {messages.length === 0 && <div className="chat-empty">Повідомлень ще немає</div>}
       </div>
 
       <div className="chat-input">
@@ -75,12 +76,20 @@ export default function ChatPanel({ roomId, displayName, onClose }) {
           placeholder="Напишіть повідомлення..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") send();
-          }}
+          onKeyDown={(e) => { if (e.key === "Enter") send(); }}
         />
         <button onClick={send}>↵</button>
       </div>
     </aside>
   );
+}
+
+function getStableClientId() {
+  const key = "rfi_chat_client_id";
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    id = crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+    sessionStorage.setItem(key, id);
+  }
+  return id;
 }

@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "./layout/Header";
+import ChatPanel from "./room/ChatPanel";
+import CodeEditor from "./room/CodeEditor";
 import { useLocalMedia } from "./video/useLocalMedia";
 import { useWebRTC } from "./video/useWebRTC";
 import { getJoinInfo } from "../api/scheduleApi";
@@ -8,7 +10,7 @@ export default function VideoCallPage({ lessonId, onLogout, onNavigate, current 
   const [info, setInfo] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [phase, setPhase] = useState("lobby"); // lobby | call
+  const [phase, setPhase] = useState("lobby");
 
   const media = useLocalMedia();
 
@@ -19,63 +21,61 @@ export default function VideoCallPage({ lessonId, onLogout, onNavigate, current 
       .finally(() => setLoading(false));
   }, [lessonId]);
 
-  // у лобі — одразу прев'ю
   useEffect(() => {
-    if (phase === "lobby" && !loading && info) {
-      media.start();
-    }
-    // eslint-disable-next-line
+    if (phase === "lobby" && !loading && info) media.start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, loading, info]);
 
   if (loading) {
     return (
-      <><Header onLogout={onLogout} onNavigate={onNavigate} current={current} />
-        <main className="vc-page"><div className="il-loading">Завантаження...</div></main></>
+      <>
+        <Header onLogout={onLogout} onNavigate={onNavigate} current={current} />
+        <main className="vc-page"><div className="il-loading">Завантаження...</div></main>
+      </>
     );
   }
+
   if (error || !info) {
     return (
-      <><Header onLogout={onLogout} onNavigate={onNavigate} current={current} />
+      <>
+        <Header onLogout={onLogout} onNavigate={onNavigate} current={current} />
         <main className="vc-page">
           <div className="error-message">{error || "Заняття недоступне"}</div>
           <button className="submit-btn" style={{ marginTop: 16 }} onClick={() => onNavigate?.("schedule")}>
             ← До розкладу
           </button>
-        </main></>
+        </main>
+      </>
     );
   }
 
-  return (
+  return phase === "lobby" ? (
     <>
       <Header onLogout={onLogout} onNavigate={onNavigate} current={current} />
       <main className="vc-page">
-        {phase === "lobby" ? (
-          <Lobby
-            info={info}
-            media={media}
-            onJoin={() => setPhase("call")}
-            onBack={() => { media.stop(); onNavigate?.("schedule"); }}
-          />
-        ) : (
-          <Call
-            info={info}
-            media={media}
-            onLeave={() => { media.stop(); onNavigate?.("schedule"); }}
-          />
-        )}
+        <Lobby
+          info={info}
+          media={media}
+          onJoin={() => setPhase("call")}
+          onBack={() => { media.stop(); onNavigate?.("schedule"); }}
+        />
       </main>
     </>
+  ) : (
+    <Call
+      info={info}
+      media={media}
+      current={current}
+      onLeave={() => { media.stop(); onNavigate?.("schedule"); }}
+    />
   );
 }
 
-/* ------------------- ЛОБІ (прев'ю + налаштування пристроїв) ------------------- */
 function Lobby({ info, media, onJoin, onBack }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (videoRef.current && media.stream) {
-      videoRef.current.srcObject = media.stream;
-    }
+    if (videoRef.current && media.stream) videoRef.current.srcObject = media.stream;
   }, [media.stream]);
 
   return (
@@ -84,10 +84,10 @@ function Lobby({ info, media, onJoin, onBack }) {
       <p className="hint">
         {info.title} з {info.counterpartFirstName} {info.counterpartLastName}
       </p>
+
       {!info.joinable && (
         <div className="info-message">
-          Вікно приєднання ще не відкрите (доступно за 15 хв до початку). Ви можете перевірити
-          камеру й мікрофон зараз.
+          Вікно приєднання ще не відкрите. Ви можете перевірити камеру й мікрофон зараз.
         </div>
       )}
 
@@ -100,33 +100,13 @@ function Lobby({ info, media, onJoin, onBack }) {
 
       <div className="vc-controls">
         <button className={`vc-ctrl ${media.micOn ? "" : "off"}`} onClick={media.toggleMic}>
-          {media.micOn ? "🎤 Мікрофон" : "🔇 Вимкнено"}
+          {media.micOn ? "🎤 Мікрофон" : "🔇 Мікрофон"}
         </button>
         <button className={`vc-ctrl ${media.camOn ? "" : "off"}`} onClick={media.toggleCam}>
           {media.camOn ? "📹 Камера" : "🚫 Камера"}
         </button>
       </div>
 
-      <div className="vc-devices">
-        <label>
-          Камера
-          <select value={media.selected.camId} onChange={(e) => media.chooseDevice("video", e.target.value)}>
-            <option value="">За замовчуванням</option>
-            {media.devices.cams.map((d) => (
-              <option key={d.deviceId} value={d.deviceId}>{d.label || "Камера"}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Мікрофон
-          <select value={media.selected.micId} onChange={(e) => media.chooseDevice("audio", e.target.value)}>
-            <option value="">За замовчуванням</option>
-            {media.devices.mics.map((d) => (
-              <option key={d.deviceId} value={d.deviceId}>{d.label || "Мікрофон"}</option>
-            ))}
-          </select>
-        </label>
-      </div>
 
       <div className="row-buttons" style={{ marginTop: 18 }}>
         <button className="ghost-btn" onClick={onBack}>Назад</button>
@@ -138,10 +118,50 @@ function Lobby({ info, media, onJoin, onBack }) {
   );
 }
 
-/* ------------------------------- ДЗВІНОК ------------------------------- */
-function Call({ info, media, onLeave }) {
+function Call({ info, media, current, onLeave }) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const [codeOpen, setCodeOpen] = useState(false);
   const localRef = useRef(null);
   const remoteRef = useRef(null);
+
+  const displayName = useMemo(() => {
+    const fromCurrent = `${current?.firstName || ""} ${current?.lastName || ""}`.trim();
+    if (fromCurrent) return fromCurrent;
+
+    const raw = localStorage.getItem("rfi_user") || localStorage.getItem("user");
+    if (raw) {
+      try {
+        const user = JSON.parse(raw);
+        const name = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+        if (name) return name;
+        if (user.email) return user.email;
+      } catch { /* ignore */ }
+    }
+    return "Учасник";
+  }, [current]);
+
+  const participantId = useMemo(() => {
+    if (current?.id) return `user-${current.id}`;
+    if (current?.email) return `email-${current.email}`;
+
+    const raw = localStorage.getItem("rfi_user") || localStorage.getItem("user");
+    if (raw) {
+      try {
+        const user = JSON.parse(raw);
+        if (user.id) return `user-${user.id}`;
+        if (user.email) return `email-${user.email}`;
+      } catch { /* ignore */ }
+    }
+
+    const key = "rfi_call_client_id";
+    let id = sessionStorage.getItem(key);
+    if (!id) {
+      id = crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+      sessionStorage.setItem(key, id);
+    }
+    return id;
+  }, [current]);
+
   const { status, remoteStream, hangup } = useWebRTC({
     room: info.room,
     localStream: media.stream,
@@ -163,38 +183,69 @@ function Call({ info, media, onLeave }) {
     failed: "Помилка зʼєднання",
   }[status] || status;
 
-  const leave = () => { hangup(); onLeave(); };
+  const leave = () => {
+    hangup();
+    onLeave();
+  };
 
   return (
-    <div className="vc-call">
-      <div className="vc-call-head">
-        <span>{info.title}</span>
-        <span className={`vc-status ${status}`}>{statusLabel}</span>
-      </div>
+    <main className={`vc-fullscreen ${chatOpen ? "with-chat" : ""} ${codeOpen ? "with-code" : ""}`}>
+      <section className="vc-main-panel">
+        <header className="vc-topbar">
+          <div>
+            <strong>{info.title}</strong>
+            <span>{info.counterpartFirstName} {info.counterpartLastName}</span>
+          </div>
+          <span className={`vc-status ${status}`}>{statusLabel}</span>
+        </header>
 
-      <div className="vc-stage">
-        <div className="vc-remote">
-          {remoteStream ? (
-            <video ref={remoteRef} autoPlay playsInline className="vc-video remote" />
-          ) : (
-            <div className="vc-waiting">Очікуємо, поки приєднається {info.counterpartFirstName}...</div>
-          )}
-        </div>
-        <div className="vc-local-pip">
-          <video ref={localRef} autoPlay playsInline muted className="vc-video local" />
-          {!media.camOn && <div className="vc-cam-off small">Камера вимкнена</div>}
-        </div>
-      </div>
+        <div className="vc-stage-full">
+          <div className="vc-remote-full">
+            {remoteStream ? (
+              <video ref={remoteRef} autoPlay playsInline className="vc-video remote" />
+            ) : (
+              <div className="vc-waiting">Очікуємо, поки приєднається {info.counterpartFirstName}...</div>
+            )}
+          </div>
 
-      <div className="vc-controls">
-        <button className={`vc-ctrl ${media.micOn ? "" : "off"}`} onClick={media.toggleMic}>
-          {media.micOn ? "🎤" : "🔇"}
-        </button>
-        <button className={`vc-ctrl ${media.camOn ? "" : "off"}`} onClick={media.toggleCam}>
-          {media.camOn ? "📹" : "🚫"}
-        </button>
-        <button className="vc-ctrl leave" onClick={leave}>📞 Завершити</button>
-      </div>
-    </div>
+          <div className="vc-local-pip-full">
+            <video ref={localRef} autoPlay playsInline muted className="vc-video local" />
+            {!media.camOn && <div className="vc-cam-off small">Камера вимкнена</div>}
+          </div>
+        </div>
+
+        <footer className="vc-bottom-controls">
+          <button className={`vc-round ${media.micOn ? "" : "off"}`} onClick={media.toggleMic} title="Мікрофон">
+            {media.micOn ? "🎤" : "🔇"}
+          </button>
+          <button className={`vc-round ${media.camOn ? "" : "off"}`} onClick={media.toggleCam} title="Камера">
+            {media.camOn ? "📹" : "🚫"}
+          </button>
+          <button className={`vc-round ${chatOpen ? "active" : ""}`} onClick={() => setChatOpen((v) => !v)} title="Чат">
+            💬
+          </button>
+          <button className={`vc-code-toggle ${codeOpen ? "active" : ""}`} onClick={() => setCodeOpen((v) => !v)}>
+            💻 Live coding
+          </button>
+          <button className="vc-leave" onClick={leave}>📞 Завершити</button>
+        </footer>
+      </section>
+
+      {codeOpen && (
+        <aside className="vc-code-panel">
+          <div className="vc-side-header">
+            <span>Live-кодинг</span>
+            <button onClick={() => setCodeOpen(false)}>×</button>
+          </div>
+          <CodeEditor roomId={info.room} displayName={displayName} participantId={participantId} />
+        </aside>
+      )}
+
+      {chatOpen && (
+        <aside className="vc-chat-panel">
+          <ChatPanel roomId={info.room} displayName={displayName} participantId={participantId} onClose={() => setChatOpen(false)} />
+        </aside>
+      )}
+    </main>
   );
 }

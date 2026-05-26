@@ -1,96 +1,127 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
 
-// мови для випадного списку: { value: монако-id, label, pistonLang, pistonVersion, defaultCode }
+const SIGNALING_URL = import.meta.env.VITE_SIGNALING_URL || "ws://localhost:4444";
+const PISTON_URL = import.meta.env.VITE_PISTON_URL || "/piston/api/v2/execute";
+
 const LANGUAGES = [
   {
     value: "javascript",
     label: "JavaScript",
-    pistonLang: "node",          // у Piston JS = node
+    pistonLang: "javascript",
     pistonVersion: "18.15.0",
-    defaultCode: `console.log("Hello, world!");\n`,
+    fileName: "main.js",
+    defaultCode: `function fibonacci(n) {\n  if (n <= 0) return 0;\n  if (n === 1) return 1;\n\n  let a = 0, b = 1;\n  for (let i = 2; i <= n; i++) {\n    let temp = a + b;\n    a = b;\n    b = temp;\n  }\n  return b;\n}\n\nconsole.log(fibonacci(10));\n`,
   },
   {
     value: "python",
     label: "Python",
     pistonLang: "python",
     pistonVersion: "3.10.0",
-    defaultCode: `print("Hello, world!")\n`,
+    fileName: "main.py",
+    defaultCode: `def fibonacci(n):\n    if n <= 0:\n        return 0\n    if n == 1:\n        return 1\n\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b\n\nprint(fibonacci(10))\n`,
+  },
+  {
+    value: "cpp",
+    label: "C++",
+    pistonLang: "c++",
+    pistonVersion: "10.2.0",
+    fileName: "main.cpp",
+    defaultCode: `#include <iostream>\n\nlong long fibonacci(int n) {\n    if (n <= 0) return 0;\n    if (n == 1) return 1;\n\n    long long a = 0, b = 1;\n    for (int i = 2; i <= n; ++i) {\n        long long temp = a + b;\n        a = b;\n        b = temp;\n    }\n    return b;\n}\n\nint main() {\n    std::cout << fibonacci(10) << std::endl;\n    return 0;\n}\n`,
   },
   {
     value: "java",
     label: "Java",
     pistonLang: "java",
     pistonVersion: "15.0.2",
-    defaultCode: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, world!");\n    }\n}\n`,
-  },
-  {
-    value: "cpp",
-    label: "C++",
-    pistonLang: "gcc",            // у Piston C++ = gcc
-    pistonVersion: "10.2.0",
-    defaultCode: `#include <iostream>\nint main() {\n    std::cout << "Hello, world!" << std::endl;\n    return 0;\n}\n`,
-  },
-  {
-    value: "csharp",
-    label: "C#",
-    pistonLang: "mono",           // у Piston C# = mono
-    pistonVersion: "6.12.0",
-    defaultCode: `using System;\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, world!");\n    }\n}\n`,
-  },
-  {
-    value: "go",
-    label: "Go",
-    pistonLang: "go",
-    pistonVersion: "1.16.2",
-    defaultCode: `package main\nimport "fmt"\nfunc main() {\n    fmt.Println("Hello, world!")\n}\n`,
+    fileName: "Main.java",
+    defaultCode: `public class Main {\n    public static void main(String[] args) {\n        System.out.println(fibonacci(10));\n    }\n\n    static long fibonacci(int n) {\n        if (n <= 0) return 0;\n        if (n == 1) return 1;\n        long a = 0, b = 1;\n        for (int i = 2; i <= n; i++) {\n            long temp = a + b;\n            a = b;\n            b = temp;\n        }\n        return b;\n    }\n}\n`,
   },
   {
     value: "typescript",
     label: "TypeScript",
     pistonLang: "typescript",
     pistonVersion: "5.0.3",
-    defaultCode: `const msg: string = "Hello, world!";\nconsole.log(msg);\n`,
+    fileName: "main.ts",
+    defaultCode: `function fibonacci(n: number): number {\n  if (n <= 0) return 0;\n  if (n === 1) return 1;\n\n  let a = 0, b = 1;\n  for (let i = 2; i <= n; i++) {\n    const temp = a + b;\n    a = b;\n    b = temp;\n  }\n  return b;\n}\n\nconsole.log(fibonacci(10));\n`,
+  },
+  {
+    value: "csharp",
+    label: "C#",
+    pistonLang: "csharp",
+    pistonVersion: "6.12.0",
+    fileName: "main.cs",
+    defaultCode: `using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine(Fibonacci(10));\n    }\n\n    static long Fibonacci(int n) {\n        if (n <= 0) return 0;\n        if (n == 1) return 1;\n        long a = 0, b = 1;\n        for (int i = 2; i <= n; i++) {\n            long temp = a + b;\n            a = b;\n            b = temp;\n        }\n        return b;\n    }\n}\n`,
+  },
+  {
+    value: "go",
+    label: "Go",
+    pistonLang: "go",
+    pistonVersion: "1.16.2",
+    fileName: "main.go",
+    defaultCode: `package main\n\nimport "fmt"\n\nfunc fibonacci(n int) int {\n    if n <= 0 { return 0 }\n    if n == 1 { return 1 }\n    a, b := 0, 1\n    for i := 2; i <= n; i++ {\n        a, b = b, a + b\n    }\n    return b\n}\n\nfunc main() {\n    fmt.Println(fibonacci(10))\n}\n`,
   },
 ];
-function getFileName(langValue) {
-  switch (langValue) {
-    case "cpp": return "main.cpp";
-    case "csharp": return "main.cs";
-    case "java": return "Main.java";
-    case "javascript": return "main.js";
-    case "typescript": return "main.ts";
-    case "python": return "main.py";
-    case "go": return "main.go";
-    default: return "main.txt";
+
+function normalizePistonOutput(data) {
+  if (!data) return "(порожній вивід)";
+  if (data.message) return data.message;
+
+  const chunks = [
+    data.compile?.stderr,
+    data.compile?.stdout,
+    data.compile?.output,
+    data.run?.stderr,
+    data.run?.stdout,
+    data.run?.output,
+  ]
+    .filter(Boolean)
+    .map((x) => String(x).trim())
+    .filter(Boolean);
+
+  const unique = [];
+  for (const chunk of chunks) {
+    if (!unique.includes(chunk)) unique.push(chunk);
   }
+
+  return unique.join("\n").trim() || "(порожній вивід)";
 }
 
-const PISTON_URL = "/piston/api/v2/execute";
+function makeRunId() {
+  return crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
-export default function CodeEditor({ roomId, displayName }) {
+export default function CodeEditor({ roomId, displayName, participantId }) {
   const editorRef = useRef(null);
   const ydocRef = useRef(null);
   const providerRef = useRef(null);
   const bindingRef = useRef(null);
   const ymapRef = useRef(null);
+  const languageRef = useRef("javascript");
+  const lastOutputIdRef = useRef(null);
 
   const [language, setLanguage] = useState("javascript");
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
 
-  // Yjs init — створюємо один раз
+  const currentLanguage = useMemo(
+    () => LANGUAGES.find((l) => l.value === language) || LANGUAGES[0],
+    [language]
+  );
+
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+
   useEffect(() => {
     const ydoc = new Y.Doc();
     const provider = new WebrtcProvider(`${roomId}-code`, ydoc, {
-      // публічні безкоштовні signaling-сервери Yjs
-      signaling: ["ws://localhost:4444"],
+      signaling: [SIGNALING_URL],
     });
-
-    const ymap = ydoc.getMap("meta"); // зберігаємо тут активну мову
+    const ymap = ydoc.getMap("meta");
 
     ydocRef.current = ydoc;
     providerRef.current = provider;
@@ -98,34 +129,43 @@ export default function CodeEditor({ roomId, displayName }) {
 
     provider.awareness.setLocalStateField("user", {
       name: displayName,
-      color: stringToColor(displayName),
+      color: stringToColor(displayName || participantId || "user"),
     });
 
-    // слухаємо зміну мови від іншого учасника
     const onMetaChange = () => {
-      const lang = ymap.get("language");
-      if (lang && lang !== language) {
-        setLanguage(lang);
+      const nextLang = ymap.get("language");
+      if (nextLang && nextLang !== languageRef.current) {
+        setLanguage(nextLang);
+      }
+
+      const isRunning = ymap.get("isRunning");
+      setRunning(Boolean(isRunning));
+
+      const out = ymap.get("lastOutput");
+      if (out?.id && out.id !== lastOutputIdRef.current) {
+        lastOutputIdRef.current = out.id;
+        const prefix = out.authorId === participantId ? "" : `[${out.author || "Учасник"} виконав]\n`;
+        setOutput(`${prefix}${out.text || "(порожній вивід)"}`);
       }
     };
+
     ymap.observe(onMetaChange);
 
-    // якщо мова вже встановлена кимось — підхопити
     const existingLang = ymap.get("language");
     if (existingLang) setLanguage(existingLang);
+    else ymap.set("language", "javascript");
+
+    onMetaChange();
 
     return () => {
       ymap.unobserve(onMetaChange);
-      if (bindingRef.current) bindingRef.current.destroy();
+      bindingRef.current?.destroy();
       provider.destroy();
       ydoc.destroy();
     };
-    // навмисно один раз
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [roomId, displayName, participantId]);
 
-  // привʼязуємо редактор до Yjs після його монтування
-  const handleEditorMount = (editor, monaco) => {
+  const handleEditorMount = (editor) => {
     editorRef.current = editor;
 
     const ydoc = ydocRef.current;
@@ -133,44 +173,50 @@ export default function CodeEditor({ roomId, displayName }) {
     if (!ydoc || !provider) return;
 
     const ytext = ydoc.getText("monaco");
-
-    // якщо в кімнаті ще нікого і текст порожній — заповнюємо дефолтним кодом
-    // (це робиться один раз, бо Yjs миттєво синхронізує між учасниками)
     if (ytext.length === 0) {
-      const lang = LANGUAGES.find((l) => l.value === language);
-      ytext.insert(0, lang?.defaultCode || "");
-      ymapRef.current?.set("language", language);
+      ytext.insert(0, currentLanguage.defaultCode);
     }
 
-    const binding = new MonacoBinding(
+    bindingRef.current?.destroy();
+    bindingRef.current = new MonacoBinding(
       ytext,
       editor.getModel(),
       new Set([editor]),
       provider.awareness
     );
-    bindingRef.current = binding;
   };
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
+    const lang = LANGUAGES.find((l) => l.value === newLang) || LANGUAGES[0];
     setLanguage(newLang);
     ymapRef.current?.set("language", newLang);
 
-    // підставляємо дефолтний код для нової мови ТІЛЬКИ якщо редактор порожній
     const ytext = ydocRef.current?.getText("monaco");
-    if (ytext && ytext.length === 0) {
-      const lang = LANGUAGES.find((l) => l.value === newLang);
-      ytext.insert(0, lang?.defaultCode || "");
+    if (ytext && editorRef.current) {
+      ydocRef.current.transact(() => {
+        ytext.delete(0, ytext.length);
+        ytext.insert(0, lang.defaultCode);
+      });
     }
+    setOutput("");
   };
 
   const handleRun = async () => {
     const code = editorRef.current?.getValue() || "";
-    const lang = LANGUAGES.find((l) => l.value === language);
-    if (!lang) return;
+    const lang = LANGUAGES.find((l) => l.value === language) || LANGUAGES[0];
+    const runId = makeRunId();
 
     setRunning(true);
     setOutput("Виконання...");
+    ymapRef.current?.set("isRunning", true);
+    ymapRef.current?.set("lastOutput", {
+      id: `${runId}-running`,
+      text: "Виконання...",
+      author: displayName || "Учасник",
+      authorId: participantId,
+      at: Date.now(),
+    });
 
     try {
       const res = await fetch(PISTON_URL, {
@@ -179,65 +225,52 @@ export default function CodeEditor({ roomId, displayName }) {
         body: JSON.stringify({
           language: lang.pistonLang,
           version: lang.pistonVersion,
-           files: [{ name: getFileName(lang.value), content: code }],
+          files: [{ name: lang.fileName, content: code }],
         }),
       });
-      const data = await res.json();
 
-      const stdout = data.run?.stdout || "";
-      const stderr = data.run?.stderr || "";
-      const compile = data.compile?.stderr || "";
-      const combined = [compile, stdout, stderr].filter(Boolean).join("\n");
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(data?.message || `HTTP ${res.status}`);
+      }
 
-      setOutput(combined || "(порожній вивід)");
-
-      // ділимося результатом з іншими учасниками
+      const text = normalizePistonOutput(data);
+      lastOutputIdRef.current = runId;
+      setOutput(text);
       ymapRef.current?.set("lastOutput", {
-        text: combined,
-        author: displayName,
+        id: runId,
+        text,
+        author: displayName || "Учасник",
+        authorId: participantId,
         at: Date.now(),
       });
     } catch (err) {
-      setOutput("Помилка виконання: " + err.message);
+      const text = "Помилка виконання: " + err.message;
+      lastOutputIdRef.current = runId;
+      setOutput(text);
+      ymapRef.current?.set("lastOutput", {
+        id: runId,
+        text,
+        author: displayName || "Учасник",
+        authorId: participantId,
+        at: Date.now(),
+      });
     } finally {
       setRunning(false);
+      ymapRef.current?.set("isRunning", false);
     }
   };
-
-  // підписуємось на чужі результати виконання
-  useEffect(() => {
-    const ymap = ymapRef.current;
-    if (!ymap) return;
-    const onChange = () => {
-      const out = ymap.get("lastOutput");
-      if (out && out.author !== displayName) {
-        setOutput(`[${out.author} виконав]\n${out.text}`);
-      }
-    };
-    ymap.observe(onChange);
-    return () => ymap.unobserve(onChange);
-  }, [displayName]);
 
   return (
     <div className="code-panel">
       <div className="code-toolbar">
-        <select
-          value={language}
-          onChange={handleLanguageChange}
-          className="lang-select"
-        >
+        <select value={language} onChange={handleLanguageChange} className="lang-select">
           {LANGUAGES.map((l) => (
-            <option key={l.value} value={l.value}>
-              {l.label}
-            </option>
+            <option key={l.value} value={l.value}>{l.label}</option>
           ))}
         </select>
 
-        <button
-          className="run-btn"
-          onClick={handleRun}
-          disabled={running}
-        >
+        <button className="run-btn" onClick={handleRun} disabled={running}>
           {running ? "Виконується..." : "▶ Запустити"}
         </button>
       </div>
@@ -248,11 +281,14 @@ export default function CodeEditor({ roomId, displayName }) {
           language={language}
           theme="vs-dark"
           onMount={handleEditorMount}
+          path={currentLanguage.fileName}
           options={{
             minimap: { enabled: false },
-            fontSize: 14,
+            fontSize: 15,
+            fontFamily: "Consolas, 'Courier New', monospace",
             scrollBeyondLastLine: false,
             automaticLayout: true,
+            tabSize: 2,
           }}
         />
       </div>
@@ -265,12 +301,10 @@ export default function CodeEditor({ roomId, displayName }) {
   );
 }
 
-// детермінований колір з імені — для курсорів інших учасників
 function stringToColor(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const h = Math.abs(hash) % 360;
-  return `hsl(${h}, 70%, 60%)`;
+  return `hsl(${Math.abs(hash) % 360}, 70%, 60%)`;
 }

@@ -385,6 +385,8 @@ function VerificationsTab() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -406,6 +408,50 @@ function VerificationsTab() {
     }
   };
 
+  const openVerificationPreview = async (path, name) => {
+    if (!path) return;
+
+    try {
+      setPreviewLoading(true);
+
+      const token = localStorage.getItem("token");
+      const normalized = path.startsWith("/") ? path : `/${path}`;
+      const url = `${import.meta.env.VITE_API_URL}${normalized}`;
+
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!res.ok) {
+        throw new Error("Не вдалося відкрити файл верифікації");
+      }
+
+      const contentType = res.headers.get("Content-Type") || "";
+      const blob = await res.blob();
+      const fixedBlob = new Blob([blob], {
+        type: contentType || blob.type || "application/octet-stream",
+      });
+      const blobUrl = URL.createObjectURL(fixedBlob);
+
+      setPreview({
+        url: blobUrl,
+        type: contentType || blob.type || "",
+        name,
+      });
+    } catch (e) {
+      alert(e.message || msg(e));
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const closePreview = () => {
+    if (preview?.url) {
+      URL.revokeObjectURL(preview.url);
+    }
+    setPreview(null);
+  };
+
   if (loading) return <Loading />;
   if (error) return <Err msg={error} />;
   if (!items.length) {
@@ -413,40 +459,107 @@ function VerificationsTab() {
   }
 
   return (
-    <div className="adm-list">
-      {items.map((u) => (
-        <div key={u.id} className="adm-card">
-          <div className="adm-card-head">
-            <strong>
-              {u.firstName} {u.lastName}
-            </strong>
+    <>
+      <div className="adm-list">
+        {items.map((u) => (
+          <div key={u.id} className="adm-card">
+            <div className="adm-card-head">
+              <strong>
+                {u.firstName} {u.lastName}
+              </strong>
 
-            <span className="adm-muted">{u.email}</span>
+              <span className="adm-muted">{u.email}</span>
+            </div>
+
+            <div className="adm-fields">
+              <span>Статус верифікації: {u.verificationStatus}</span>
+              {u.verificationCreatedAt && (
+                <span>
+                  Дата заявки: {new Date(u.verificationCreatedAt).toLocaleString("uk-UA")}
+                </span>
+              )}
+              {u.nameMatch !== null && u.nameMatch !== undefined && (
+                <span>Збіг імені: {u.nameMatch ? "так" : "ні"}</span>
+              )}
+              {u.faceMatch !== null && u.faceMatch !== undefined && (
+                <span>Збіг обличчя: {u.faceMatch ? "так" : "ні"}</span>
+              )}
+              {u.faceSimilarity !== null && u.faceSimilarity !== undefined && (
+                <span>Схожість обличчя: {Number(u.faceSimilarity).toFixed(2)}</span>
+              )}
+            </div>
+
+            {u.extractedTextPreview && (
+              <div className="adm-note">
+                <strong>Текст з документа:</strong>
+                <br />
+                {u.extractedTextPreview}
+              </div>
+            )}
+
+            <div className="adm-verification-files">
+              {u.profilePhotoUrl ? (
+                <button
+                  type="button"
+                  className="adm-file-link"
+                  disabled={previewLoading}
+                  onClick={() => openVerificationPreview(u.profilePhotoUrl, "Фото профілю")}
+                >
+                  Відкрити фото профілю
+                </button>
+              ) : (
+                <span className="adm-muted">Фото профілю не прикріплено</span>
+              )}
+
+              {u.selfieUrl ? (
+                <button
+                  type="button"
+                  className="adm-file-link"
+                  disabled={previewLoading}
+                  onClick={() => openVerificationPreview(u.selfieUrl, "Фото з камери")}
+                >
+                  Відкрити фото з камери
+                </button>
+              ) : (
+                <span className="adm-muted">Фото з камери не прикріплено</span>
+              )}
+
+              {u.documentUrl ? (
+                <button
+                  type="button"
+                  className="adm-file-link"
+                  disabled={previewLoading}
+                  onClick={() => openVerificationPreview(u.documentUrl, "Документ")}
+                >
+                  Відкрити документ
+                </button>
+              ) : (
+                <span className="adm-muted">Документ не прикріплено</span>
+              )}
+            </div>
+
+            <div className="adm-actions">
+              <button
+                className="submit-btn"
+                style={{ width: "auto" }}
+                onClick={() => decide(u.id, true)}
+              >
+                Підтвердити
+              </button>
+
+              <button
+                className="ghost-btn danger"
+                onClick={() => decide(u.id, false)}
+              >
+                Відхилити
+              </button>
+            </div>
           </div>
+        ))}
+      </div>
 
-          <div className="adm-muted">
-            Статус верифікації: {u.verificationStatus}
-          </div>
-
-          <div className="adm-actions">
-            <button
-              className="submit-btn"
-              style={{ width: "auto" }}
-              onClick={() => decide(u.id, true)}
-            >
-              Підтвердити
-            </button>
-
-            <button
-              className="ghost-btn danger"
-              onClick={() => decide(u.id, false)}
-            >
-              Відхилити
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
+      {preview && <FilePreviewModal preview={preview} onClose={closePreview} />}
+    </>
   );
 }
 

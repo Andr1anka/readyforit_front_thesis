@@ -21,7 +21,6 @@ const EMPTY_LESSON = {
   longDescription: "",
   tags: [],
   price: "",
-  durationMultiplier: 1.0,
 };
 
 export default function InterviewerProfilePage({ onLogout, onNavigate, current }) {
@@ -98,8 +97,7 @@ function SettingsSection() {
     <form className="profile-form" onSubmit={save}>
       <h3>Базові налаштування</h3>
       <p className="hint">
-        Ці значення використовуються для нарізання слотів. Тривалість конкретного заняття
-        може відрізнятись через множник (x2, x0.5).
+        Ці значення використовуються для нарізання слотів. Базова тривалість застосовується до всіх занять інтерв'юера.
       </p>
       <label>
         Базова тривалість заняття (хв)
@@ -154,7 +152,6 @@ function LessonTypesSection() {
       longDescription: it.longDescription || "",
       tags: it.tags || [],
       price: it.price ?? "",
-      durationMultiplier: it.durationMultiplier ?? 1.0,
     });
     setEditing(it.id);
     setError("");
@@ -175,7 +172,7 @@ function LessonTypesSection() {
       longDescription: form.longDescription,
       tags: form.tags,
       price: Number(form.price),
-      durationMultiplier: Number(form.durationMultiplier),
+      durationMultiplier: 1,
     };
     try {
       setSaving(true);
@@ -227,29 +224,15 @@ function LessonTypesSection() {
         />
         <label>Мітки (спеціалізації)</label>
         <TagInput value={form.tags} onChange={(tags) => setForm((f) => ({ ...f, tags }))} />
-        <div className="form-row-2">
-          <label>
-            Ціна (грн)
-            <input
-              type="number" min="1"
-              value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-              required
-            />
-          </label>
-          <label>
-            Множник тривалості
-            <select
-              value={form.durationMultiplier}
-              onChange={(e) => setForm((f) => ({ ...f, durationMultiplier: e.target.value }))}
-            >
-              <option value="0.5">x0.5 (половина)</option>
-              <option value="1">x1 (звичайне)</option>
-              <option value="1.5">x1.5</option>
-              <option value="2">x2 (подвійне)</option>
-            </select>
-          </label>
-        </div>
+        <label>
+          Ціна (грн)
+          <input
+            type="number" min="1"
+            value={form.price}
+            onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+            required
+          />
+        </label>
         <div className="row-buttons">
           <button type="button" className="ghost-btn" onClick={cancel}>Скасувати</button>
           <button className="submit-btn" disabled={saving}>{saving ? "Збереження..." : "Зберегти"}</button>
@@ -279,7 +262,7 @@ function LessonTypesSection() {
                 </div>
                 <div className="lt-meta">
                   <span>{it.price} грн</span>
-                  <span>· {it.effectiveDurationMinutes} хв (x{it.durationMultiplier})</span>
+                  <span>· {it.effectiveDurationMinutes} хв</span>
                 </div>
               </div>
               <div className="lt-actions">
@@ -375,7 +358,6 @@ function SlotsSection() {
       <h3>Згенерувати слоти</h3>
       <p className="hint">
         Вкажіть дату й бажаний проміжок. Слоти завжди нарізаються за базовою тривалістю заняття + перервою.
-        Множник x1/x2 впливає лише на вигляд слота в анкеті конкретного заняття.
       </p>
       <form onSubmit={doPreview} className="slot-gen-form">
         <label>

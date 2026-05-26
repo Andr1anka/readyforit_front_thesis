@@ -96,14 +96,14 @@ export default function LessonDetailsPage({ lessonTypeId, onLogout, onNavigate, 
             <section className="ld-section">
               <h2>Розклад</h2>
               <SlotGrid
-                slots={withDisplayDuration(details.slots, details.effectiveDurationMinutes)}
+                slots={details.slots}
                 selectedId={selectedSlot?.id}
                 onPick={(s) => setSelectedSlot(s)}
               />
               {selectedSlot && (
                 <div className="ld-booking-bar">
                   <span>
-                    Обрано: {formatDay(selectedSlot.date)} {selectedSlot.startTime}–{selectedSlot.displayEndTime || selectedSlot.endTime}
+                    Обрано: {formatDay(selectedSlot.date)} {selectedSlot.startTime}–{selectedSlot.endTime}
                   </span>
                   <button
                     className="submit-btn"
@@ -233,21 +233,4 @@ function buildApiFileUrl(url) {
     : apiBase.replace(/\/$/, "");
 
   return `${originBase}${url.startsWith("/") ? url : `/${url}`}`;
-}
-
-function withDisplayDuration(slots = [], durationMinutes) {
-  return slots.map((s) => ({
-    ...s,
-    displayDurationMinutes: durationMinutes || s.durationMinutes,
-    displayEndTime: addMinutes(s.startTime, durationMinutes || s.durationMinutes),
-  }));
-}
-
-function addMinutes(hhmm, minutes) {
-  if (!hhmm || !minutes) return hhmm;
-  const [h, m] = hhmm.split(":").map(Number);
-  const total = h * 60 + m + Number(minutes);
-  const hh = Math.floor(total / 60) % 24;
-  const mm = total % 60;
-  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }

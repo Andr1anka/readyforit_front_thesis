@@ -103,22 +103,32 @@ function ArchivedView({ data }) {
       {data.items.map((it) => (
         <div key={it.lessonId} className="sch-archived">
           <ScheduleCard item={it} />
+          {it.canLeaveInterviewerFeedback && (
+            <div className="info-message" style={{ marginTop: 10 }}>
+              Щоб отримати оплату за це заняття, залиште обов'язкову рецензію для студента.
+            </div>
+          )}
           {it.reviewFromInterviewer && (
             <div className="sch-review">
-              <strong>Рецензія інтерв'юера:</strong>
+              <strong>Рецензія інтерв'юера по заняттю:</strong>
               <p>{it.reviewFromInterviewer}</p>
             </div>
           )}
           {it.myRating != null && (
             <div className="sch-myreview">
-              <strong>Ваш відгук:</strong> <span className="ld-stars">{stars(it.myRating)}</span>
+              <strong>Ваш публічний відгук:</strong> <span className="ld-stars">{stars(it.myRating)}</span>
               {it.myReviewComment && <p>{it.myReviewComment}</p>}
             </div>
           )}
           <div className="sch-archived-actions">
+            {it.canLeaveInterviewerFeedback && (
+              <button className="ghost-btn small" onClick={() => setModal({ lessonId: it.lessonId, mode: "feedback" })}>
+                Залишити обов'язкову рецензію
+              </button>
+            )}
             {it.canReview && (
               <button className="ghost-btn small" onClick={() => setModal({ lessonId: it.lessonId, mode: "review" })}>
-                Залишити відгук
+                Залишити публічний відгук
               </button>
             )}
             <button className="ghost-btn small danger" onClick={() => setModal({ lessonId: it.lessonId, mode: "complaint" })}>

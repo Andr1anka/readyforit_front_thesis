@@ -12,6 +12,14 @@ export const submitReview = async (lessonId, rating, comment) => {
   return res.data;
 };
 
+export const submitInterviewerFeedback = async (lessonId, feedback) => {
+  const res = await API.post("/reviews/interviewer-feedback", {
+    lessonId: Number(lessonId),
+    feedback,
+  });
+  return res.data;
+};
+
 export const getMyWrittenReviews = async () => {
   const res = await API.get("/reviews/written");
   return res.data;
