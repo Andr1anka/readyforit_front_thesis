@@ -103,23 +103,4 @@ function App() {
   }
 }
 
-/** Простенька заглушка щоб навігація працювала ще до того як зробиш сторінку. */
-function ComingSoon({ title, onLogout, onNavigate, current }) {
-  // якщо у тебе Header у відокремленому компоненті ─ можна підключити сюди:
-  // import Header from "./components/layout/Header";
-  return (
-    <div style={{ padding: 40, textAlign: "center" }}>
-      <h1>{title}</h1>
-      <p style={{ color: "#6e6b7e" }}>Сторінка в розробці.</p>
-      <button
-        className="submit-btn"
-        style={{ marginTop: 20 }}
-        onClick={() => onNavigate("home")}
-      >
-        ← На головну
-      </button>
-    </div>
-  );
-}
-
 export default App;
