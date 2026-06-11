@@ -5,6 +5,15 @@ import Header from "./layout/Header";
 import Avatar from "./Avatar";
 import SlotGrid from "./interviewer/SlotGrid";
 import { getLessonDetails, getInterviewerReviews } from "../api/interviewerApi";
+import {
+  FaLinkedin,
+  FaGithub,
+  FaInstagram,
+  FaFacebook,
+  FaTelegram,
+  FaYoutube,
+  FaGlobe
+} from "react-icons/fa";
 
 marked.setOptions({ breaks: true });
 
@@ -79,6 +88,22 @@ export default function LessonDetailsPage({ lessonTypeId, onLogout, onNavigate, 
                   {details.experienceYears != null && <span>· Досвід: {details.experienceYears} р.</span>}
                   <span>· Тривалість: {details.effectiveDurationMinutes} хв</span>
                 </div>
+                {details.socialMedia?.length > 0 && (
+                <div className="ld-socials">
+                 {details.socialMedia.map((s) => (
+                  <a
+                    key={s.link}
+                    href={s.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ld-social-link"
+                  >
+                      {socialIcon(s.title)}
+                      <span>{s.title}</span>
+                    </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </section>
 
@@ -233,4 +258,16 @@ function buildApiFileUrl(url) {
     : apiBase.replace(/\/$/, "");
 
   return `${originBase}${url.startsWith("/") ? url : `/${url}`}`;
+}
+function socialIcon(title = "") {
+  const t = title.toLowerCase();
+
+  if (t.includes("linkedin")) return <FaLinkedin />;
+  if (t.includes("github")) return <FaGithub />;
+  if (t.includes("instagram")) return <FaInstagram />;
+  if (t.includes("facebook")) return <FaFacebook />;
+  if (t.includes("telegram")) return <FaTelegram />;
+  if (t.includes("youtube")) return <FaYoutube />;
+
+  return <FaGlobe />;
 }

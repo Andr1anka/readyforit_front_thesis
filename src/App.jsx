@@ -10,6 +10,8 @@ import SchedulePage from "./components/SchedulePage";
 import VideoCallPage from "./components/VideoCallPage";
 import ReviewsPage from "./components/ReviewsPage";
 import AdminPage from "./components/AdminPage";
+import BackgroundBubbles from "./components/layout/BackgroundBubbles";
+
 import "./styles/auth.css";
 import "./styles/profile.css";
 import "./styles/interviewer.css";
@@ -20,13 +22,22 @@ import "./styles/schedule.css";
 import "./styles/video-call.css";
 import "./styles/reviews.css";
 import "./styles/admin.css";
+import "./styles/index.css";
+
+function AppShell({ children }) {
+  return (
+    <div className="app-shell">
+      <BackgroundBubbles />
+      <div className="app-content">{children}</div>
+    </div>
+  );
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => !!localStorage.getItem("token")
   );
 
-  // активний екран ─ зберігаємо в sessionStorage щоб не скидатись при перезавантаженні
   const [screen, setScreen] = useState(
     () => sessionStorage.getItem("rfi_screen") || "home"
   );
@@ -59,48 +70,45 @@ function App() {
     current: screen,
   };
 
-  // параметризований екран: "lesson-details:<id>"
+  let page;
+
   if (screen.startsWith("lesson-details:")) {
     const lessonTypeId = screen.split(":")[1];
-    return <LessonDetailsPage lessonTypeId={lessonTypeId} {...navProps} />;
-  }
-
-  // параметризований екран: "book:<lessonTypeId>:<slotId>" (Feature 4)
-  if (screen.startsWith("book:")) {
+    page = <LessonDetailsPage lessonTypeId={lessonTypeId} {...navProps} />;
+  } else if (screen.startsWith("book:")) {
     const [, lessonTypeId, slotId] = screen.split(":");
-    return <BookingPage lessonTypeId={lessonTypeId} slotId={slotId} {...navProps} />;
-  }
-
-  // параметризований екран: "join:<lessonId>" (відеозвʼязок — Feature 5c)
-  if (screen.startsWith("join:")) {
+    page = <BookingPage lessonTypeId={lessonTypeId} slotId={slotId} {...navProps} />;
+  } else if (screen.startsWith("join:")) {
     const lessonId = screen.split(":")[1];
-    return <VideoCallPage lessonId={lessonId} {...navProps} />;
+    page = <VideoCallPage lessonId={lessonId} {...navProps} />;
+  } else {
+    switch (screen) {
+      case "profile":
+        page = <ProfilePage {...navProps} onBack={() => navigate("home")} />;
+        break;
+      case "interviewers":
+        page = <InterviewerListPage {...navProps} />;
+        break;
+      case "schedule":
+        page = <SchedulePage {...navProps} />;
+        break;
+      case "reviews":
+        page = <ReviewsPage {...navProps} />;
+        break;
+      case "interviewer-profile":
+        page = <InterviewerProfilePage {...navProps} />;
+        break;
+      case "admin":
+        page = <AdminPage {...navProps} />;
+        break;
+      case "home":
+      default:
+        page = <HomePage {...navProps} />;
+        break;
+    }
   }
 
-  switch (screen) {
-    case "profile":
-  return (
-    <ProfilePage
-      {...navProps}
-      onBack={() => navigate("home")}
-    />
-  );
-
-    case "interviewers":
-      return <InterviewerListPage {...navProps} />;
-    case "schedule":
-      return <SchedulePage {...navProps} />;
-    case "reviews":
-      return <ReviewsPage {...navProps} />;
-    case "interviewer-profile":
-      return <InterviewerProfilePage {...navProps} />;
-    case "admin":
-      return <AdminPage {...navProps} />;
-
-    case "home":
-    default:
-      return <HomePage {...navProps} />;
-  }
+  return <AppShell>{page}</AppShell>;
 }
 
 export default App;

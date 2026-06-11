@@ -340,3 +340,15 @@ input:focus {
   margin-left: auto;
   margin-right: auto;
 }
+.auth-link-btn {
+  border: none;
+  background: transparent;
+  color: #afa3d6;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.auth-link-btn:hover {
+  text-decoration: underline;
+}

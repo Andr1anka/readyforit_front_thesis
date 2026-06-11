@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginUser, registerUser } from "../api/authApi";
+import { loginUser, registerUser, forgotPassword, resetPassword } from "../api/authApi";
 import FloatingBubbles from "./FloatingBubbles";
 import CatAnimation from "./CatAnimation";
 
@@ -17,8 +17,16 @@ export default function AuthPage({ onLoginSuccess }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetToken, setResetToken] = useState(() => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("resetToken") || "";
+});
+
+const isForgot = mode === "forgot";
+const isReset = mode === "reset" || !!resetToken;
 
   const isRegister = mode === "register";
+  const isLogin = mode === "login";
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -31,6 +39,39 @@ export default function AuthPage({ onLoginSuccess }) {
     e.preventDefault();
     setMessage("");
     setError("");
+    if (isForgot) {
+       try {
+         setLoading(true);
+         await forgotPassword(form.email);
+         setMessage("Ми надіслали посилання для відновлення паролю на вашу пошту.");
+       } catch (err) {
+         setError(err.response?.data?.message || "Не вдалося надіслати лист.");
+       } finally {
+         setLoading(false);
+       }
+       return;
+      }
+
+      if (isReset) {
+       if (form.password !== form.confirmPassword) {
+         setError("Паролі не співпадають");
+         return;
+       }
+     
+       try {
+         setLoading(true);
+         await resetPassword(resetToken, form.password);
+         setMessage("Пароль успішно змінено. Тепер можете увійти.");
+         setResetToken("");
+         setMode("login");
+         window.history.replaceState({}, document.title, window.location.pathname);
+       } catch (err) {
+         setError(err.response?.data?.message || "Не вдалося змінити пароль.");
+       } finally {
+         setLoading(false);
+       }
+       return;
+      }
 
     if (isRegister && form.password !== form.confirmPassword) {
       setError("Паролі не співпадають");
@@ -159,20 +200,22 @@ export default function AuthPage({ onLoginSuccess }) {
             </label>
 
 
-            <label>
-              Пароль
-              <input
-                type="password"
-                name="password"
-                placeholder="Введіть пароль"
-                value={form.password}
-                onChange={handleChange}
-                required
-                minLength={6}
-              />
-            </label>
+            {!isForgot && (
+              <label>
+                {isReset ? "Новий пароль" : "Пароль"}
+                <input
+                  type="password"
+                  name="password"
+                  placeholder={isReset ? "Введіть новий пароль" : "Введіть пароль"}
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  minLength={6}
+                />
+              </label>
+            )}
 
-            {isRegister && (
+            {(isRegister || isReset) && (
               <label>
                 Повторіть пароль
                 <input
@@ -187,14 +230,31 @@ export default function AuthPage({ onLoginSuccess }) {
               </label>
             )}
 
-            <button className="submit-btn" type="submit" disabled={loading}>
-              {loading
-                ? "Зачекайте..."
-                : isRegister
-                ? "Зареєструватися"
-                : "Увійти"}
-            </button>
+           <button className="submit-btn" type="submit" disabled={loading}>
+  {loading
+    ? "Зачекайте..."
+    : isForgot
+    ? "Надіслати лист"
+    : isReset
+    ? "Змінити пароль"
+    : isRegister
+    ? "Зареєструватися"
+    : "Увійти"}
+</button>
           </form>
+          {isLogin && (
+  <button
+    type="button"
+    className="auth-link-btn"
+    onClick={() => {
+      setMode("forgot");
+      setError("");
+      setMessage("");
+    }}
+  >
+    Забули пароль?
+  </button>
+)}
 
           {message && <div className="success-message">{message}</div>}
           {error && <div className="error-message">{error}</div>}

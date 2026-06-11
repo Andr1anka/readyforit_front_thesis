@@ -275,3 +275,22 @@ textarea:focus {
   font-size: 13px;
   color: #6e6b7e;
 }
+.social-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.social-edit-row {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.social-edit-row select,
+.social-edit-row input {
+  width: 100%;
+}

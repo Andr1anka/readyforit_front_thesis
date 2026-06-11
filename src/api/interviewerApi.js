@@ -93,3 +93,12 @@ export const bookLesson = async (lessonTypeId, slotId) => {
   });
   return res.data;
 };
+export const getMySocialMedia = async () => {
+  const res = await API.get("/interviewer/profile/social-media");
+  return res.data;
+};
+
+export const updateMySocialMedia = async (payload) => {
+  const res = await API.put("/interviewer/profile/social-media", payload);
+  return res.data;
+};

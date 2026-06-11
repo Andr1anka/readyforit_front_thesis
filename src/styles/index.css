@@ -1,0 +1,159 @@
+.app-shell {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background: #efeff4;
+}
+
+.app-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===========================
+   ФОН З БУЛЬБАШКАМИ
+=========================== */
+
+.global-bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.global-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: #d5ceec;
+  opacity: 0.35;
+  animation: bubbleFloat 18s ease-in-out infinite;
+}
+
+/* ЛІВА СТОРОНА */
+
+.bubble-1 {
+  width: 380px;
+  height: 380px;
+  top: 110px;
+  left: -240px;
+}
+
+.bubble-2 {
+  width: 260px;
+  height: 260px;
+  top: 420px;
+  left: -120px;
+}
+
+.bubble-3 {
+  width: 140px;
+  height: 140px;
+  top: 680px;
+  left: 40px;
+}
+
+/* ПРАВА СТОРОНА */
+
+.bubble-4 {
+  width: 420px;
+  height: 420px;
+  top: 120px;
+  right: -260px;
+}
+
+.bubble-5 {
+  width: 280px;
+  height: 280px;
+  top: 500px;
+  right: -130px;
+}
+
+.bubble-6 {
+  width: 170px;
+  height: 170px;
+  top: 760px;
+  right: 40px;
+}
+
+/* ВЕРХ */
+
+.bubble-7 {
+  width: 320px;
+  height: 320px;
+  top: -250px;
+  left: 18%;
+}
+
+.bubble-8 {
+  width: 420px;
+  height: 420px;
+  top: -300px;
+  right: 18%;
+}
+
+/* НИЗ */
+
+.bubble-9 {
+  width: 340px;
+  height: 340px;
+  bottom: -260px;
+  left: 18%;
+}
+
+.bubble-10 {
+  width: 420px;
+  height: 420px;
+  bottom: -300px;
+  right: 18%;
+}
+
+/* МАЛЕНЬКІ ДЕКОРАТИВНІ */
+
+.bubble-11 {
+  width: 90px;
+  height: 90px;
+  top: 220px;
+  left: 140px;
+  opacity: 0.2;
+}
+
+.bubble-12 {
+  width: 70px;
+  height: 70px;
+  top: 260px;
+  right: 180px;
+  opacity: 0.2;
+}
+
+.bubble-13 {
+  width: 100px;
+  height: 100px;
+  bottom: 180px;
+  left: 220px;
+  opacity: 0.2;
+}
+
+.bubble-14 {
+  width: 80px;
+  height: 80px;
+  bottom: 220px;
+  right: 240px;
+  opacity: 0.2;
+}
+
+/* АНІМАЦІЯ */
+
+@keyframes bubbleFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(8px, -10px) scale(1.02);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
